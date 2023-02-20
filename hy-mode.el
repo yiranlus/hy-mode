@@ -56,8 +56,11 @@
 (defvar hy-indent--exactly
   '("when" "unless"
     "for" "for*" "for/a" "for/a*"
-    "while"
-    "except" "catch")
+    "while" "match" "cond"
+    "try" "except" "finally"
+    "ap-each" "ap-each-while" "ap-when" "ap-with" "as->" "doto"
+    "branch" "ebranch" "case" "do-n"
+    "defmain")
   "Symbols that will have following lines indented +1 when matched.
 
 Examples:

@@ -30,106 +30,35 @@
 
 (require 'hy-base)
 
-(defvar hy-font-lock-highlight-percent-args? t
-  "Whether to highlight '%i' symbols in Hy's clojure-like syntax for lambdas.")
-
 ;;; Names Lists
 ;;;; Hy Builtins
 
 (defconst hy-font-lock--hy-builtins
-  '("*map"
-    "accumulate"
-    "assoc"
-    "butlast"
-    "calling-module-name"
-    "chain"
+  '("bnot"
+    "chainc"
     "coll?"
-    "combinations"
-    "comp"
-    "complement"
-    "compress"
-    "constantly"
-    "count"
     "cut"
-    "cycle"
-    "dec"
-    "defmain"
-    "del"
-    "disassemble"
-    "distinct"
-    "doto"
-    "drop"
-    "drop-last"
-    "drop-while"
-    "empty?"
-    "even?"
-    "every?"
+    "do-mac"
+    "delmacro"
+    "export"
     "filter"
-    "first"
-    "flatten"
-    "float?"
-    "fraction"
-    "gensym"
     "get"
-    "group-by"
-    "identity"
-    "inc"
-    "instance?"
-    "integer"
-    "integer-char?"
-    "integer?"
-    "interleave"
-    "interpose"
+    "in"
+    "not-in"
     "is"
     "is-not"
-    "islice"
-    "iterable?"
-    "iterate"
-    "iterator?"
-    "juxt"
-    "keyword"
-    "keyword?"
-    "last"
-    "macroexpand"
-    "macroexpand-1"
-    "merge-with"
-    "multicombinations"
-    "name"
-    "neg?"
-    "none?"
-    "nth"
-    "numeric?"
-    "odd?"
-    "partition"
-    "permutations"
-    "pos?"
-    "product"
+    "not?"
+    "py"
+    "pys"
     "quasiquote"
     "quote"
-    "read"
-    "read-str"
-    "reduce"
-    "remove"
-    "repeat"
-    "repeatedly"
-    "rest"
-    "second"
-    "setv"
-    "some"
-    "string"
-    "string?"
-    "symbol?"
-    "take"
-    "take-nth"
-    "take-while"
-    "tee"
+    "repr"
+    "setx"
+    "unpack-iterable"
+    "unpack-mapping"
     "unquote"
     "unquote-splice"
-    "xor"
-    "zero?"
-    "zip"
-    "zip-longest"
-    "--macros--" "__macros__")
+    "__macros__")
   "Hy-only builtin names.")
 
 ;;;; Python Builtins
@@ -147,6 +76,7 @@
     "chr"
     "compile"
     "complex"
+    "del"
     "delattr"
     "dict"
     "dir"
@@ -173,6 +103,7 @@
     "list"
     "locals"
     "map"
+    "filter"
     "max"
     "memoryview"
     "min"
@@ -196,11 +127,11 @@
     "tuple"
     "type"
     "vars"
-    "--package--" "__package__"
-    "--import--" "__import__"
-    "--all--" "__all__"
-    "--doc--" "__doc__"
-    "--name--" "__name__")
+    "__package__"
+    "__import__"
+    "__all__"
+    "__doc__"
+    "__name__")
   "Builtin names available in Python normally.")
 
 ;;;; Constants
@@ -239,16 +170,10 @@
     "defn" "defn/a"
 
     ;; Macros
-    "defmacro" "defmacro/g!" "defmacro!"
+    "defmacro"
 
-    ;; Tag Macros
-    "deftag"
-
-    ;; Defining __main__
-    "defmain"
-
-    ;; Multi-methods
-    "defmulti" "defmethod")
+    ;; Reader Macros
+    "defreader")
   "Names in Hy that define functions, macros, etc.")
 
 ;;;; Operators
@@ -262,18 +187,16 @@
 ;;;; Special Names
 
 (defconst hy-font-lock--special-names
-  '(;; Looping
-    "for" "for/a"
-    "dfor" "lfor" "sfor"  ; comprehensions
-    "loop" "recur"  ; hy.contrib.loop
+  '(;; Annotate
+    "annotate"
 
-    ;; Threading
-    "->" "->>" "as->"
+    ;; Looping
+    "for"
+    "dfor" "lfor" "gfor" "sfor"  ; comprehensions
 
     ;; Flow control
     "return"
-    "if" "if*" "if-not" "lif" "lif-not"
-    "else" "unless" "when"
+    "if" "else" "when"
     "break" "continue" "while"
     "cond"
     "do"
@@ -282,11 +205,10 @@
     "fn" "fn/a"
     "await"
     "yield" "yield-from"
-    "with" "with*" "with/a" "with/a*"
-    "with-gensyms"
+    "with" "with/a"
 
     ;; Error Handling
-    "except" "try" "throw" "raise" "catch" "finally" "assert"
+    "except" "try" "raise" "finally" "assert"
 
     ;; Python builtins (and shadowed calls to builtins)
     "print"
@@ -300,22 +222,6 @@
     "eval" "eval-and-compile" "eval-when-compile")
   "Special names like compiler stuff to highlight as keywords.")
 
-;;;; Anaphorics
-
-(defconst hy-font-lock--anaphorics
-  '("ap-dotimes"
-    "ap-each"
-    "ap-each-while"
-    "ap-filter"
-    "ap-first"
-    "ap-if"
-    "ap-last"
-    "ap-map"
-    "ap-map-when"
-    "ap-reduce"
-    "ap-reject")
-  "Hy anaphoric contrib keywords.")
-
 ;;; Keywords
 ;;;; Based on Names Lists
 
@@ -325,8 +231,7 @@
     `(: symbol-start
         (or ,@hy-font-lock--hy-builtins
             ,@hy-font-lock--python-builtins
-            ,@hy-font-lock--operators
-            ,@hy-font-lock--anaphorics)
+            ,@hy-font-lock--operators)
         symbol-end))
 
    '(0 font-lock-builtin-face))
@@ -349,6 +254,7 @@
         symbol-start
         (group-n 1 (or ,@hy-font-lock--definitions))
         (1+ space)
+	(optional (: "[" (*? anychar) "]" (1+ space)))
         (group-n 2 (1+ word))))
 
    '(1 font-lock-keyword-face)
@@ -387,20 +293,6 @@
    '(2 font-lock-type-face))
   "Hy class keywords.")
 
-(defconst hy-font-lock--kwds-decorators
-  (list
-   (rx
-    (or (: "#@"
-           (syntax open-parenthesis))
-        (: symbol-start
-           "with-decorator"
-           symbol-end
-           (1+ space)))
-    (1+ word))
-
-   '(0 font-lock-type-face))
-  "Hylight the symbol after `#@' or `with-decorator' macros keywords.")
-
 (defconst hy-font-lock--kwds-imports
   (list
    (rx symbol-start
@@ -437,23 +329,14 @@
 
 ;;;; Misc
 
-(defconst hy-font-lock--kwds-anonymous-funcs
-  (list
-   (rx symbol-start
-       (group "%" (1+ digit))
-       (or "." symbol-end))
-
-   '(1 font-lock-variable-name-face))
-  "Hy '#%(print %1 %2)' styling anonymous variables.")
-
 (defconst hy-font-lock--kwds-func-modifiers
   (list
    (rx symbol-start
        "&"
-       (1+ word))
+       symbol-end)
 
    '(0 font-lock-type-face))
-  "Hy '&rest/&kwonly/...' styling.")
+  "Hy '*' in defn.")
 
 (defconst hy-font-lock--kwds-kwargs
   (list
@@ -486,7 +369,7 @@
 (defconst hy-font-lock--kwds-variables
   (list
    (rx symbol-start
-       "setv"
+       "setx"
        symbol-end
        (1+ space)
        (group (1+ word)))
@@ -495,12 +378,6 @@
   "Hylight variable names in setv/def, only first name.")
 
 ;;;; Advanced
-
-(defconst hy-font-lock--tag-comment-prefix-rx
-  (rx "#_"
-      (* " ")
-      (group-n 1 (not (any " "))))
-  "The regex to match #_ tag comment prefixes.")
 
 (defun hy-font-lock--search-comment-macro (limit)
   "Search for a comment forward stopping at LIMIT."
@@ -592,7 +469,6 @@ applied with success to `ielm'."
         hy-font-lock--kwds-class
         hy-font-lock--kwds-constants
         hy-font-lock--kwds-definitions
-        hy-font-lock--kwds-decorators
         hy-font-lock--kwds-exceptions
         hy-font-lock--kwds-func-modifiers
         hy-font-lock--kwds-imports
@@ -605,11 +481,7 @@ applied with success to `ielm'."
         hy-font-lock--kwds-variables
 
         ;; Advanced kwds
-        hy-font-lock--kwds-tag-comment-prefix
-
-        ;; Optional kwds
-        (when hy-font-lock-highlight-percent-args?
-          hy-font-lock--kwds-anonymous-funcs))
+        hy-font-lock--kwds-tag-comment-prefix)
   "All Hy font lock keywords.")
 
 (defconst inferior-hy-font-lock-kwds
