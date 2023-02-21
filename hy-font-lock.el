@@ -379,6 +379,12 @@
 
 ;;;; Advanced
 
+(defconst hy-font-lock--tag-comment-prefix-rx
+  (rx "#_"
+      (* " ")
+      (group-n 1 (not (any " "))))
+  "The regex to match #_ tag comment prefixes.")
+
 (defun hy-font-lock--search-comment-macro (limit)
   "Search for a comment forward stopping at LIMIT."
   (-when-let* ((_ (re-search-forward hy-font-lock--tag-comment-prefix-rx limit t))

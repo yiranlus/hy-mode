@@ -55,14 +55,14 @@
 ;; TODO Would prefer to use the .set-namespace instead of remaking jedhy instance
 
 (defconst hy-jedhy--setup-code
-  "(import hy [hy.core.language [*]] [hy.core.macros [*]]) (require [hy.extra.anaphoric [*]]) (try (do (import jedhy jedhy.api) (setv --JEDHY (jedhy.api.API)) \"Started jedhy\") (except [e Exception] \"Failed to start jedhy\"))"
+  "(try (do (import jedhy jedhy.api) (setv __JEDHY (jedhy.api.API)) \"Started jedhy\") (except [e Exception] \"Failed to start jedhy\"))"
   "Text to send to internal Hy process to setup `jedhy'.")
 
-(defconst hy-jedhy--startup-success-text "'Started jedhy'"
+(defconst hy-jedhy--startup-success-text "\"Started jedhy\""
   "Text identifying successful startup of jedhy.")
 
 (defconst hy-jedhy--reset-namespace-code
-  "(setv --JEDHY (jedhy.api.API :locals- (locals) :globals- (globals) :macros- --macros--))"
+  "(import hyrule *) (require hyrule * :readers *) (setv __JEDHY (jedhy.api.API :locals- (locals) :globals- (globals) :macros- __macros__))"
   "Text to send to make Jedhy's namespace current.")
 
 ;;; Startup
@@ -151,11 +151,11 @@ Not bound atm as this is temporary, run via M-x or bind yourself."
   "Format OUTPUT given as a tuple."
   (unless (s-equals? "()" output)
     (->> output
-       (s-replace-all '(("'" . "")
-                        (",)" . "")  ; one element list case
-                        ("(" . "")
-                        (")" . "")))
-       (s-split ", "))))  ; comma is a valid token so can't replace it
+	 (s-replace-all '(("'" . "")
+			  ("\"" . "")
+                          ("(" . "")
+                          (")" . "")))
+	 (s-split " "))))  ; comma is a valid token so can't replace it
 
 (defun hy-jedhy--format-describe-output (output)
   "Converts escaped newlines to true newlines."
@@ -185,13 +185,10 @@ Not bound atm as this is temporary, run via M-x or bind yourself."
          (rx string-start (1+ (not (any space ":"))) ":"))
         (unpack-rx
          (rx (or "#*" "#**")))
-        (kwargs-rx
-         (rx symbol-start "&" (1+ word)))
         (quoted-rx
          (rx "`" (1+ (not space)) "`")))
     (hy-jedhy--fontify-text text kwd-rx 'font-lock-keyword-face)
     (hy-jedhy--fontify-text text unpack-rx 'font-lock-keyword-face)
-    (hy-jedhy--fontify-text text kwargs-rx 'font-lock-type-face)
     (hy-jedhy--fontify-text text quoted-rx 'font-lock-constant-face 'bold-italic))
   text)
 
@@ -210,7 +207,7 @@ Not bound atm as this is temporary, run via M-x or bind yourself."
   (unless (hy-jedhy--method-call? prefix-str)
     (-some->>
      prefix-str
-     (format "(--JEDHY.complete \"%s\")")
+     (format "(__JEDHY.complete \"%s\")")
      hy-shell--redirect-send-internal
      hy-jedhy--format-output-tuple)))
 
@@ -218,7 +215,7 @@ Not bound atm as this is temporary, run via M-x or bind yourself."
   "Get company annotation for a CANDIDATE-STR."
   (-some->>
    candidate-str
-   (format "(--JEDHY.annotate \"%s\")")
+   (format "(__JEDHY.annotate \"%s\")")
    hy-shell--redirect-send-internal
    hy-jedhy--format-output-str))
 
@@ -226,7 +223,7 @@ Not bound atm as this is temporary, run via M-x or bind yourself."
   "Get eldoc docstring for a CANDIDATE-STR."
   (-some->>
    candidate-str
-   (format "(--JEDHY.docs \"%s\")")
+   (format "(__JEDHY.docs \"%s\")")
    hy-shell--redirect-send-internal
    hy-jedhy--format-output-str
    hy-jedhy--quickfix-eldoc-dot-dsl-syntax-errors
@@ -236,7 +233,7 @@ Not bound atm as this is temporary, run via M-x or bind yourself."
   "Get full, multi-line docs for a CANDIDATE-STR."
   (-some->>
    candidate-str
-   (format "(--JEDHY.full-docs \"%s\")")
+   (format "(__JEDHY.full-docs \"%s\")")
    hy-shell--redirect-send-internal
    hy-jedhy--format-output-str
    s-chomp
