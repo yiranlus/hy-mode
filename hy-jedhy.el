@@ -144,18 +144,18 @@ Not bound atm as this is temporary, run via M-x or bind yourself."
 (defun hy-jedhy--format-output-str (output)
   "Format OUTPUT given as a string."
   (->> output
-     (s-chop-prefixes '("'" "\""))
-     (s-chop-suffixes '("'" "\""))))
+       (s-chop-prefixes '("'" "\""))
+       (s-chop-suffixes '("'" "\""))))
 
 (defun hy-jedhy--format-output-tuple (output)
   "Format OUTPUT given as a tuple."
   (unless (s-equals? "()" output)
-    (->> output
-	 (s-replace-all '(("'" . "")
-			  ("\"" . "")
+    (->> (substring output 1)
+         (s-replace-all '(("'" . "")
+                          ("\"" . "")
                           ("(" . "")
                           (")" . "")))
-	 (s-split " "))))  ; comma is a valid token so can't replace it
+         (s-split " "))))  ; comma is a valid token so can't replace it
 
 (defun hy-jedhy--format-describe-output (output)
   "Converts escaped newlines to true newlines."
@@ -164,9 +164,9 @@ Not bound atm as this is temporary, run via M-x or bind yourself."
                                   (group-n 1 "\\\n")
                                   (1+ (not (any "," ")"))))))
     (-some-->
-     output
-     (s-replace "\\n" "\n" it)
-     (replace-regexp-in-string kwarg-newline-regexp "newline" it nil t 1))))
+	output
+      (s-replace "\\n" "\n" it)
+      (replace-regexp-in-string kwarg-newline-regexp "newline" it nil t 1))))
 
 ;;;; Fontifying
 
@@ -206,39 +206,39 @@ Not bound atm as this is temporary, run via M-x or bind yourself."
   "Get company candidates for a PREFIX-STR."
   (unless (hy-jedhy--method-call? prefix-str)
     (-some->>
-     prefix-str
-     (format "(__JEDHY.complete \"%s\")")
-     hy-shell--redirect-send-internal
-     hy-jedhy--format-output-tuple)))
+	prefix-str
+      (format "(__JEDHY.complete \"%s\")")
+      hy-shell--redirect-send-internal
+      hy-jedhy--format-output-tuple)))
 
 (defun hy-jedhy--candidate-str->annotation (candidate-str)
   "Get company annotation for a CANDIDATE-STR."
   (-some->>
-   candidate-str
-   (format "(__JEDHY.annotate \"%s\")")
-   hy-shell--redirect-send-internal
-   hy-jedhy--format-output-str))
+      candidate-str
+    (format "(__JEDHY.annotate \"%s\")")
+    hy-shell--redirect-send-internal
+    hy-jedhy--format-output-str))
 
 (defun hy-jedhy--candidate-str->eldoc (candidate-str)
   "Get eldoc docstring for a CANDIDATE-STR."
   (-some->>
-   candidate-str
-   (format "(__JEDHY.docs \"%s\")")
-   hy-shell--redirect-send-internal
-   hy-jedhy--format-output-str
-   hy-jedhy--quickfix-eldoc-dot-dsl-syntax-errors
-   hy-jedhy--fontify-eldoc))
+      candidate-str
+    (format "(__JEDHY.docs \"%s\")")
+    hy-shell--redirect-send-internal
+    hy-jedhy--format-output-str
+    hy-jedhy--quickfix-eldoc-dot-dsl-syntax-errors
+    hy-jedhy--fontify-eldoc))
 
 (defun hy-jedhy--candidate-str->full-docs (candidate-str)
   "Get full, multi-line docs for a CANDIDATE-STR."
   (-some->>
-   candidate-str
-   (format "(__JEDHY.full-docs \"%s\")")
-   hy-shell--redirect-send-internal
-   hy-jedhy--format-output-str
-   s-chomp
-   hy-jedhy--fontify-first-docs-line
-   hy-jedhy--format-describe-output))
+      candidate-str
+    (format "(__JEDHY.full-docs \"%s\")")
+    hy-shell--redirect-send-internal
+    hy-jedhy--format-output-str
+    s-chomp
+    hy-jedhy--fontify-first-docs-line
+    hy-jedhy--format-describe-output))
 
 ;;; Describe thing at point
 
