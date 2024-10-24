@@ -62,7 +62,7 @@
   "Text identifying successful startup of jedhy.")
 
 (defconst hy-jedhy--reset-namespace-code
-  "(import hyrule *) (require hyrule * :readers *) (setv __JEDHY (jedhy.api.API :locals- (locals) :globals- (globals) :macros- __macros__))"
+  "(import hyrule *) (require hyrule * :readers *) (setv __JEDHY (jedhy.api.API :locals- (locals) :globals- (globals) :macros- _hy_macros))"
   "Text to send to make Jedhy's namespace current.")
 
 ;;; Startup

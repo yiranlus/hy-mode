@@ -48,7 +48,7 @@
 (defvar hy-shell--notify? t
   "Allow Hy to message on failure to find Hy, instantiation, shutdown, etc?")
 
-(defvar hy-shell--redirect-timeout 0.5
+(defvar hy-shell--redirect-timeout 3
   "Seconds (float) to allow redirection commands to complete before quitting.")
 
 ;;;; Managed
@@ -124,8 +124,8 @@
                      (-map #'shell-quote-argument)
                      (s-join " "))))
     (if (hy-shell--internal?)
-        prog
-      (format "%s %s" prog switches))))
+      (format "%s -i" prog)
+      (format "%s -i %s" prog switches))))
 
 ;;;; Creation
 
@@ -136,13 +136,14 @@
             (split-string-and-unquote (hy-shell--format-startup-command)))
            (name
             (if (hy-shell--internal?) hy-shell--name-internal hy-shell--name)))
+      ;(apply #'make-comint-in-buffer name nil program nil switches)
       (apply #'make-comint-in-buffer name nil program nil switches)
 
       (unless (derived-mode-p 'inferior-hy-mode)
         (inferior-hy-mode))
 
       ;; Get shell's initial output/prompt
-      (accept-process-output (hy-shell--current-process) 0.5)
+      (accept-process-output (hy-shell--current-process) hy-shell--redirect-timeout)
 
       (hy-shell--current-process))))
 
